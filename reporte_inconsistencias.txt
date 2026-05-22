@@ -1,0 +1,142 @@
+=================================================================
+  REPORTE DE INCONSISTENCIAS — On Daxelta
+  Generado: 2026-05-21 00:36:39
+=================================================================
+
+
+─────────────────────────────────────────────────────────────────
+  ARCHIVO: Customers
+─────────────────────────────────────────────────────────────────
+
+  [CRITICO]
+  FechaNacimiento nula  → 19,708 registros
+
+  [CRITICO]
+  Nacidos después de 2017 (imposible)  → 89 registros
+
+  [ADVERTENCIA]
+  Edad calculada < 16 años (no deberían ser titulares)  → 114,774 registros
+
+  [ADVERTENCIA]
+  Edad calculada > 90 años (verificar)  → 187,930 registros
+
+  [ADVERTENCIA]
+  Segmento nulo  → 1 registros
+
+  [INFO]
+  FechaNacimiento NO confiable (marcada, no eliminada): 322,412 (40.2%)
+
+  [INFO]
+  Distribución segmentos: {'SUSTENTO': 579136, 'Sin Segmento': 165543, 'RECORRIDO': 56494, 'NEGOCIO': 164}
+
+─────────────────────────────────────────────────────────────────
+  ARCHIVO: Estaciones
+─────────────────────────────────────────────────────────────────
+
+  [CRITICO]
+  Registro con IdEstacion = 0 (fila inválida)  → 1 registros
+
+  [CRITICO]
+  TipoEstacion nulo  → 5 registros
+
+  [ADVERTENCIA]
+  Valores sucios en TipoEstacion antes de normalizar: ['Propia GNV', 'Operadora', 'Franquiciada GNV', 'Franquiciada  Banderazo GNV', 'anquiciada GNV', ' Operadora                    ', 'Franquiciada GNV \r\r\n', ' Franquiciada GNV             ']
+
+  [ADVERTENCIA]
+  Registros sin TipoEstacion después de normalizar  → 4 registros
+
+  [INFO]
+  Tipos finales: {'Franquiciada GNV': 251, 'Propia GNV': 107, 'Operadora': 45, 'Sin Clasificar': 4}
+
+─────────────────────────────────────────────────────────────────
+  ARCHIVO: Geo
+─────────────────────────────────────────────────────────────────
+
+  [ADVERTENCIA]
+  Ciudades con IdCiudad negativo (México, Chile, Perú, Venezuela)  → 4 registros
+
+  [INFO]
+  Ciudades Colombia: 1,121 | Internacionales apartadas: 4
+
+─────────────────────────────────────────────────────────────────
+  ARCHIVO: Trans_2_Sem
+─────────────────────────────────────────────────────────────────
+
+  [CRITICO]
+  Header del archivo desplazado: columnas renombradas según contenido real
+
+─────────────────────────────────────────────────────────────────
+  ARCHIVO: Transacciones
+─────────────────────────────────────────────────────────────────
+
+  [INFO]
+  Registros antes de deduplicar: 739,681 (Trans_Sem: 370,183 | Trans_2_Sem: 369,498)
+
+  [ADVERTENCIA]
+  Registros duplicados exactos eliminados  → 4,406 registros
+
+  [ADVERTENCIA]
+  Transacciones sin cliente identificado (IdCliente=-99999): 137,383 (18.7%) — Se conservan, se marca la columna  → 137,383 registros
+
+  [ADVERTENCIA]
+  Gal <= 0 — se eliminan  → 2 registros
+
+  [INFO]
+  Outliers ValorVenta > p99 ($34,392) marcados: 7,353
+
+  [INFO]
+  Outliers Gal > p99 (22.06 gal) marcados: 7,351
+
+  [ADVERTENCIA]
+  Clientes en transacciones sin registro en Customers: 2,055
+
+  [INFO]
+  Registros finales limpios: 735,273
+
+─────────────────────────────────────────────────────────────────
+  ARCHIVO: Validación
+─────────────────────────────────────────────────────────────────
+
+  [INFO]
+  Estaciones en tx sin maestro: 0
+
+  [ADVERTENCIA]
+  IdCiudad en Customers sin match en Geo Colombia: 12  → 12 registros
+
+  [INFO]
+  IdCiudad en Estaciones sin match en Geo: 0
+
+
+=================================================================
+  RESUMEN
+=================================================================
+
+  ❌ Críticos     : 5
+  ⚠️  Advertencias : 11
+  ℹ️  Informativos : 10
+
+
+=================================================================
+  RECOMENDACIONES DE ESTANDARIZACIÓN
+=================================================================
+  1. Definir un esquema de validación en origen para FechaNacimiento.
+     Rechazar fechas futuras o años de nacimiento > (año_actual - 16).
+  
+  2. Corregir el header de Trans_2_Sem en el sistema fuente.
+     El orden correcto de columnas es:
+     Placa | IdCliente | IdEstacion | ValorVenta | Gal_Fid | Gal | FechaVenta
+  
+  3. Estandarizar TipoEstacion con lista de valores controlada:
+     Valores permitidos: Propia GNV | Franquiciada GNV | Operadora
+  
+  4. Implementar un programa de captura para el 18-19% de transacciones
+     sin IdCliente (-99999). Representan ~$8M en ventas no atribuidas.
+  
+  5. Resolver los 2.055 clientes activos sin ficha en Customers.
+     Probable carga tardía de datos maestros.
+  
+  6. Definir política para registros internacionales (IdCiudad < 0).
+     Separar de la geografía Colombia para análisis regionales.
+  
+  7. Auditar outliers de ValorVenta (> $34.352 p99) y Gal (> 22 gal p99).
+     Pueden ser vehículos de carga pesada legítimos o errores de captura.
