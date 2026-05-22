@@ -1,6 +1,6 @@
 =================================================================
   REPORTE DE INCONSISTENCIAS — On Daxelta
-  Generado: 2026-05-20 20:04:02
+  Generado: 2026-05-20 22:58:55
 =================================================================
 
 
@@ -21,7 +21,10 @@
   Edad calculada > 90 años (verificar)  → 187,930 registros
 
   [ADVERTENCIA]
-  Segmento nulo  → 1 registros
+  Segmento NaN (nulo técnico)  → 1 registros
+
+  [ADVERTENCIA]
+  Segmento 'Sin Segmento' literal en fuente (20.7% sin clasificar real)  → 165,542 registros
 
   [INFO]
   FechaNacimiento NO confiable (marcada, no eliminada): 322,412 (40.2%)
@@ -56,7 +59,7 @@
   Ciudades con IdCiudad negativo (México, Chile, Perú, Venezuela)  → 4 registros
 
   [INFO]
-  Ciudades Colombia: 1,121 | Internacionales apartadas: 4
+  Ciudades Colombia: 1,122 | Internacionales marcadas: 4
 
 ─────────────────────────────────────────────────────────────────
   ARCHIVO: Trans_2_Sem
@@ -101,7 +104,7 @@
   Estaciones en tx sin maestro: 0
 
   [ADVERTENCIA]
-  IdCiudad en Customers sin match en Geo Colombia: 12  → 12 registros
+  IdCiudad en Customers sin match en Geo (Col+Intl): 9  → 9 registros
 
   [INFO]
   IdCiudad en Estaciones sin match en Geo: 0
@@ -112,7 +115,7 @@
 =================================================================
 
   ❌ Críticos     : 5
-  ⚠️  Advertencias : 11
+  ⚠️  Advertencias : 12
   ℹ️  Informativos : 10
 
 
@@ -135,8 +138,13 @@
   5. Resolver los 2.055 clientes activos sin ficha en Customers.
      Probable carga tardía de datos maestros.
   
-  6. Definir política para registros internacionales (IdCiudad < 0).
-     Separar de la geografía Colombia para análisis regionales.
+  6. Registros internacionales (IdCiudad < 0): conservados en geo_clean
+     con flag EsInternacional para filtrado por slicer en Power BI.
+     Evita pérdida de relación con ~13k clientes asociados.
   
   7. Auditar outliers de ValorVenta (> $34.352 p99) y Gal (> 22 gal p99).
      Pueden ser vehículos de carga pesada legítimos o errores de captura.
+  
+  8. Segmento Customers: eliminar la categoría literal 'Sin Segmento'
+     del dominio. Debe ser un nulo enrutado a flujo de asignación,
+     no una opción válida (afecta ~20% de la base).

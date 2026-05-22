@@ -1,0 +1,21 @@
+
+PRUEBA ANALISTA DE DATOS
+Contexto
+On Daxelta es una empresa de gas vehicular que premia a sus usuarios por consumos en sus estaciones de servicio, el sistema lleva algunos años funcionando, pero para la construcción de la estrategia del siguiente año se debe analizar la data histórica de la marca.
+Su tarea es gestionar los datos presentes en las bases Customers, Estaciones, Geo, Trans_sem, Trans_2_Sem  y generar hallazgos de valor sobre el comportamiento del negocio, para ello debe realizar una presentación y dashboards que apoyen el análisis de la data.
+
+
+
+Dentro del desarrollo del caso debe, como mínimo:
+
+1.	Analizar la volumetría del galonaje por día de la semana. 
+2.	Realizar el pronóstico del valor venta para los siguientes días martes y miércoles.
+3.	Analizar el comportamiento por Regional
+4.	Analizar el comportamiento por Estación de servicio
+5.	Haga una segmentación para conocer a nuestros clientes y genere gráficas que permitan entender cómo se caracteriza cada segmento.
+6.	Identifique los clientes de mayor valor para la marca.
+
+Documente el proceso realizado y las herramientas utilizadas en la construcción del caso.
+Genere recomendaciones sobre la estandarización de la información y reporte de inconsistencias en caso de encontrar problemas con la data entregada para el análisis.
+
+

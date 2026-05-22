@@ -15,10 +15,14 @@ SALIDAS (carpeta /output):
     trans_clean.csv        — Transacciones unificadas y limpias
     customers_clean.csv    — Clientes normalizados
     estaciones_clean.csv   — Estaciones normalizadas
-    geo_clean.csv          — Geografía filtrada (solo Colombia)
+    geo_clean.csv          — Geografía completa con flag EsInternacional
     reporte_inconsistencias.txt — Documentación de hallazgos
 ============================================================
 """
+
+import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 import pandas as pd
 import numpy as np
@@ -68,15 +72,18 @@ registrar("Geo", "ADVERTENCIA",
 geo["NombreDpto"]   = geo["NombreDpto"].str.strip()
 geo["NombreCiudad"] = geo["NombreCiudad"].str.strip()
 
-# Separar geografía Colombia vs internacional (para joins seguros)
-geo_colombia       = geo[geo["IdCiudad"] > 0].copy().reset_index(drop=True)
-geo_internacional  = geo[geo["IdCiudad"] < 0].copy().reset_index(drop=True)
+# Conservar TODAS las ciudades (Colombia + internacionales) con flag.
+# Evita pérdida de relación con ~13k clientes en ciudades internacionales.
+# Filtrado por slicer en Power BI (EsInternacional = False) para vista Colombia.
+geo["EsInternacional"] = geo["IdCiudad"] < 0
+n_colombia      = (~geo["EsInternacional"]).sum()
+n_internacional = geo["EsInternacional"].sum()
 
 registrar("Geo", "INFO",
-          f"Ciudades Colombia: {len(geo_colombia):,} | Internacionales apartadas: {len(geo_internacional):,}")
+          f"Ciudades Colombia: {n_colombia:,} | Internacionales marcadas: {n_internacional:,}")
 
-geo_colombia.to_csv(os.path.join(OUTPUT_DIR, "geo_clean.csv"), index=False, encoding="utf-8-sig")
-print(f"   ✔ geo_clean.csv guardado ({len(geo_colombia):,} filas)")
+geo.to_csv(os.path.join(OUTPUT_DIR, "geo_clean.csv"), index=False, encoding="utf-8-sig")
+print(f"   ✔ geo_clean.csv guardado ({len(geo):,} filas)")
 
 
 # ══════════════════════════════════════════════════════════
@@ -162,17 +169,25 @@ registrar("Customers", "ADVERTENCIA",
 registrar("Customers", "ADVERTENCIA",
           "Edad calculada > 90 años (verificar)", n_mayores_90)
 
-# -- Diagnóstico Segmento
+# -- Diagnóstico Segmento (NaN técnico vs "Sin Segmento" literal en fuente)
 n_seg_nulo = cust["Segmento"].isnull().sum()
+_seg_strip = cust["Segmento"].astype("string").str.strip()
+n_seg_literal_sin = (_seg_strip == "Sin Segmento").sum()
+n_seg_total_sin   = n_seg_nulo + n_seg_literal_sin
+pct_seg_sin      = n_seg_total_sin / n_total_cust * 100
+
 registrar("Customers", "ADVERTENCIA",
-          "Segmento nulo", n_seg_nulo)
+          "Segmento NaN (nulo técnico)", n_seg_nulo)
+registrar("Customers", "ADVERTENCIA",
+          f"Segmento 'Sin Segmento' literal en fuente ({pct_seg_sin:.1f}% sin clasificar real)",
+          n_seg_literal_sin)
 
 # -- Limpieza
-# Normalizar Segmento: strip de espacios
-cust["Segmento"] = cust["Segmento"].str.strip().fillna("Sin Segmento")
+# Normalizar Segmento: strip de espacios + nulos a "Sin Segmento"
+cust["Segmento"] = _seg_strip.fillna("Sin Segmento")
 
-# Normalizar IdCiudad para join
-cust["IdCiudad"] = pd.to_numeric(cust["IdCiudad"], errors="coerce")
+# Normalizar IdCiudad para join (Int64 nullable, consistente con trans)
+cust["IdCiudad"] = pd.to_numeric(cust["IdCiudad"], errors="coerce").astype("Int64")
 
 # Marcar filas con FechaNacimiento no confiable (para análisis de edad)
 # NO se eliminan — se marcan para uso correcto en segmentación demográfica
@@ -347,12 +362,12 @@ est_huerfanas = tx_est - est_ids
 registrar("Validación", "INFO" if not est_huerfanas else "ADVERTENCIA",
           f"Estaciones en tx sin maestro: {len(est_huerfanas):,}")
 
-# Ciudades de clientes vs Geo
-geo_ids        = set(geo_colombia["IdCiudad"].unique())
+# Ciudades de clientes vs Geo completo (Col + Internacional)
+geo_ids        = set(geo["IdCiudad"].unique())
 cust_city_ids  = set(cust["IdCiudad"].dropna().unique())
 ciudades_sin_geo = cust_city_ids - geo_ids
 registrar("Validación", "ADVERTENCIA",
-          f"IdCiudad en Customers sin match en Geo Colombia: {len(ciudades_sin_geo):,}",
+          f"IdCiudad en Customers sin match en Geo (Col+Intl): {len(ciudades_sin_geo):,}",
           len(ciudades_sin_geo))
 
 # Ciudades de estaciones vs Geo
@@ -420,11 +435,16 @@ with open(reporte_path, "w", encoding="utf-8") as f:
         "5. Resolver los 2.055 clientes activos sin ficha en Customers.",
         "   Probable carga tardía de datos maestros.",
         "",
-        "6. Definir política para registros internacionales (IdCiudad < 0).",
-        "   Separar de la geografía Colombia para análisis regionales.",
+        "6. Registros internacionales (IdCiudad < 0): conservados en geo_clean",
+        "   con flag EsInternacional para filtrado por slicer en Power BI.",
+        "   Evita pérdida de relación con ~13k clientes asociados.",
         "",
         "7. Auditar outliers de ValorVenta (> $34.352 p99) y Gal (> 22 gal p99).",
         "   Pueden ser vehículos de carga pesada legítimos o errores de captura.",
+        "",
+        "8. Segmento Customers: eliminar la categoría literal 'Sin Segmento'",
+        "   del dominio. Debe ser un nulo enrutado a flujo de asignación,",
+        "   no una opción válida (afecta ~20% de la base).",
     ]
     for r in recomendaciones:
         f.write(f"  {r}\n")
