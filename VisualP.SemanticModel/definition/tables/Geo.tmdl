@@ -1,0 +1,38 @@
+table Geo
+	lineageTag: 3e21a8f3-20f9-45d1-af1b-abd5ac8e2798
+
+	column NombreDpto
+		dataType: string
+		lineageTag: d526aa9e-e76b-4492-b291-de4001617d1a
+		summarizeBy: none
+		sourceColumn: NombreDpto
+
+	column IdCiudad
+		dataType: int64
+		isHidden
+		lineageTag: 4be7d89f-6d92-4034-a15a-3e6fe9878a06
+		summarizeBy: none
+		sourceColumn: IdCiudad
+
+	column NombreCiudad
+		dataType: string
+		lineageTag: 3a02aac2-97dd-4672-a08f-59f4b8cad77b
+		summarizeBy: none
+		sourceColumn: NombreCiudad
+
+	column EsInternacional
+		dataType: boolean
+		lineageTag: b4ef4c00-6323-418d-a64d-38d298d486b7
+		summarizeBy: none
+		sourceColumn: EsInternacional
+
+	partition Geo = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(File.Contents("C:\Users\weizm\Downloads\PruebaAnlistaDatos\analisis_datos\output\geo_clean.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    Tipos = Table.TransformColumnTypes(Encabezados, {{"NombreDpto", type text}, {"IdCiudad", Int64.Type}, {"NombreCiudad", type text}, {"EsInternacional", type logical}})
+				in
+				    Tipos
+

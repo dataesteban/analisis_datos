@@ -1,0 +1,76 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "ed8045809ede4fdabc47",
+  "position": {
+    "x": 960,
+    "y": 515,
+    "z": 8000,
+    "height": 195,
+    "width": 310,
+    "tabOrder": 12000
+  },
+  "visual": {
+    "visualType": "barChart",
+    "query": {
+      "queryState": {
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Estaciones"
+                    }
+                  },
+                  "Property": "TipoEstacion"
+                }
+              },
+              "queryRef": "Estaciones.TipoEstacion",
+              "nativeQueryRef": "TipoEstacion",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Pct Fidelizacion"
+                }
+              },
+              "queryRef": "_Medidas.Pct Fidelizacion",
+              "nativeQueryRef": "Pct Fidelizacion"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "categoryAxis": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "valueAxis": [
+        {
+          "properties": {}
+        }
+      ]
+    }
+  }
+}

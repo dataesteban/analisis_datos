@@ -1,0 +1,31 @@
+table Forecast
+	lineageTag: b52f3a79-bab5-4fee-b183-113595620ac0
+
+	column Fecha
+		dataType: dateTime
+		lineageTag: 17c9caca-faf4-48e3-b79b-3faee9c697c6
+		summarizeBy: none
+		sourceColumn: Fecha
+
+		variation Variación
+			isDefault
+			relationship: f6d9ca15-ca74-45b4-bd01-42f3cf0173ea
+			defaultHierarchy: LocalDateTable_b0d35c4d-6470-4522-925d-8c814d266a0e.'Jerarquía de fechas'
+
+	column DiaSemana
+		dataType: string
+		lineageTag: 70adcea8-ee43-416a-9f53-80103f85b662
+		summarizeBy: none
+		sourceColumn: DiaSemana
+
+	partition Forecast = m
+		mode: import
+		source =
+				let
+				    Origen = Table.FromRows(
+				        {{#datetime(2017, 8, 1, 0, 0, 0), "Martes"}, {#datetime(2017, 8, 2, 0, 0, 0), "Miercoles"}},
+				        {"Fecha", "DiaSemana"}),
+				    Tipada = Table.TransformColumnTypes(Origen, {{"Fecha", type datetime}, {"DiaSemana", type text}})
+				in
+				    Tipada
+

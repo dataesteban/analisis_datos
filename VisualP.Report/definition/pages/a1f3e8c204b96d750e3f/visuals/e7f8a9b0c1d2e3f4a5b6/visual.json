@@ -1,0 +1,161 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.9.0/schema.json",
+  "name": "e7f8a9b0c1d2e3f4a5b6",
+  "position": {
+    "x": 850,
+    "y": 10,
+    "z": 5000,
+    "height": 700,
+    "width": 420,
+    "tabOrder": 6000
+  },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Clientes"
+                    }
+                  },
+                  "Property": "Segmento RFM"
+                }
+              },
+              "queryRef": "Clientes.Segmento RFM",
+              "nativeQueryRef": "Segmento RFM"
+            },
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "Clientes"
+                    }
+                  },
+                  "Property": "EsFlota"
+                }
+              },
+              "queryRef": "Clientes.EsFlota",
+              "nativeQueryRef": "EsFlota"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Total Clientes"
+                }
+              },
+              "queryRef": "_Medidas.Total Clientes",
+              "nativeQueryRef": "Total Clientes"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Edad Promedio"
+                }
+              },
+              "queryRef": "_Medidas.Edad Promedio",
+              "nativeQueryRef": "Edad Promedio"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Pct FechaNac Confiable"
+                }
+              },
+              "queryRef": "_Medidas.Pct FechaNac Confiable",
+              "nativeQueryRef": "Pct FechaNac Confiable"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "_Medidas"
+                    }
+                  },
+                  "Property": "Valor Promedio Cliente"
+                }
+              },
+              "queryRef": "_Medidas.Valor Promedio Cliente",
+              "nativeQueryRef": "Valor Promedio Cliente"
+            },
+            {
+              "field": {
+                "Aggregation": {
+                  "Expression": {
+                    "Column": {
+                      "Expression": {
+                        "SourceRef": {
+                          "Entity": "Clientes"
+                        }
+                      },
+                      "Property": "Edad"
+                    }
+                  },
+                  "Function": 1
+                }
+              },
+              "queryRef": "Sum(Clientes.Edad)",
+              "nativeQueryRef": "Promedio de Edad"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            },
+            "bold": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "values": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

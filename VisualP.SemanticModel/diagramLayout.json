@@ -1,0 +1,165 @@
+{
+  "version": "1.1.0",
+  "diagrams": [
+    {
+      "ordinal": 0,
+      "scrollPosition": {
+        "x": 609,
+        "y": 385.66600239527884
+      },
+      "nodes": [
+        {
+          "location": {
+            "x": 1805.1722567424092,
+            "y": 356.83300119763942
+          },
+          "nodeIndex": "_Medidas",
+          "nodeLineageTag": "e74b0a21-7eeb-48b1-a4a8-cba13416227e",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 50,
+            "y": 407.23550376928853
+          },
+          "nodeIndex": "Calendario",
+          "nodeLineageTag": "bd00cf37-432c-4b09-916f-a4b5ec20b958",
+          "size": {
+            "height": 296,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1246.2567367958438,
+            "y": 731.66600239527884
+          },
+          "nodeIndex": "Clientes",
+          "nodeLineageTag": "deb9f67b-6d18-4e64-aaad-a49ca6f3fcee",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1159.0074170990958,
+            "y": 455.67163599946963
+          },
+          "nodeIndex": "customers_clean",
+          "nodeLineageTag": "e9f330e0-65f3-4973-b257-a0e8e1c23a72",
+          "size": {
+            "height": 224,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 872.68502274294758,
+            "y": 303.99353187802546
+          },
+          "nodeIndex": "Estaciones",
+          "nodeLineageTag": "0a69f8be-0463-43b6-af89-52f644c91fd2",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 624.92977248288344,
+            "y": 509.56965771230591
+          },
+          "nodeIndex": "estaciones_clean",
+          "nodeLineageTag": "737c6830-82c8-435d-a8f6-3d9998a8eae2",
+          "size": {
+            "height": 152,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 2054.1722567424094,
+            "y": 476.83300119763942
+          },
+          "nodeIndex": "Forecast",
+          "nodeLineageTag": "b52f3a79-bab5-4fee-b183-113595620ac0",
+          "size": {
+            "height": 128,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 874.67222095047475,
+            "y": 715.34509229558512
+          },
+          "nodeIndex": "Geo",
+          "nodeLineageTag": "3e21a8f3-20f9-45d1-af1b-abd5ac8e2798",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 1536.172256742409,
+            "y": 526.11059942140969
+          },
+          "nodeIndex": "geo_clean",
+          "nodeLineageTag": "958b45ee-243c-41ab-b8ce-651af1403191",
+          "size": {
+            "height": 176,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 337.09471225550652,
+            "y": 349.17686598235468
+          },
+          "nodeIndex": "Trans",
+          "nodeLineageTag": "93f4c62d-608f-4256-8877-8146a968476d",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        },
+        {
+          "location": {
+            "x": 873.95773013946257,
+            "y": -50
+          },
+          "nodeIndex": "trans_clean",
+          "nodeLineageTag": "4a05c086-eeee-49f7-9399-79c183c0ec13",
+          "size": {
+            "height": 300,
+            "width": 234
+          },
+          "zIndex": 0
+        }
+      ],
+      "name": "Todas las tablas",
+      "zoomValue": 100,
+      "pinKeyFieldsToTop": false,
+      "showExtraHeaderInfo": false,
+      "hideKeyFieldsWhenCollapsed": false,
+      "tablesLocked": false
+    }
+  ],
+  "selectedDiagram": "Todas las tablas",
+  "defaultDiagram": "Todas las tablas"
+}

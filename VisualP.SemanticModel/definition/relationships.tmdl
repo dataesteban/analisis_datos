@@ -1,0 +1,68 @@
+relationship c633daf8-0392-4eb4-879a-265c794b9a13
+	fromColumn: Trans.IdEstacion
+	toColumn: Estaciones.IdEstacion
+
+relationship ab96f86a-22a6-417d-a43b-317b9cc8a12f
+	fromColumn: Trans.IdCliente
+	toColumn: Clientes.IdCliente
+
+relationship e8d2d098-0630-4be4-b6ec-5a636209857e
+	fromColumn: Trans.FechaVenta
+	toColumn: Calendario.Fecha
+
+relationship 9b18ffa1-8280-4ca2-bdfd-b1953e7162d2
+	fromColumn: Estaciones.IdCiudad
+	toColumn: Geo.IdCiudad
+
+relationship 8bc620b1-74e1-4c6e-b6a5-6067fc9bfa21
+	isActive: false
+	fromColumn: Clientes.IdCiudad
+	toColumn: Geo.IdCiudad
+
+relationship 8f4d89d0-b316-4290-9446-fbf15a355cc6
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Clientes.FechaNacimiento
+	toColumn: LocalDateTable_fdbdc1a7-2950-41b4-aeed-04271f604eff.Date
+
+relationship 58a0a1ae-90d4-42d6-80f9-da65c59b322a
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Calendario.Fecha
+	toColumn: LocalDateTable_443c4952-3be2-4d8e-9f3a-e296ce6f7531.Date
+
+relationship f6d9ca15-ca74-45b4-bd01-42f3cf0173ea
+	joinOnDateBehavior: datePartOnly
+	fromColumn: Forecast.Fecha
+	toColumn: LocalDateTable_b0d35c4d-6470-4522-925d-8c814d266a0e.Date
+
+relationship 00569a9d-0d96-4878-8d7a-86e24f7dfb00
+	joinOnDateBehavior: datePartOnly
+	fromColumn: trans_clean.FechaVenta
+	toColumn: LocalDateTable_b4d85c89-4931-499e-9822-b9528731152e.Date
+
+relationship 517d4d38-c467-41a6-88a0-85fdd93671f7
+	joinOnDateBehavior: datePartOnly
+	fromColumn: customers_clean.FechaNacimiento
+	toColumn: LocalDateTable_d20839ee-92b0-459e-8567-75a25a69c844.Date
+
+relationship AutoDetected_e5069710-96f9-4a6d-8fb4-73b97171e271
+	fromColumn: trans_clean.IdEstacion
+	toColumn: estaciones_clean.IdEstacion
+
+relationship AutoDetected_e21cbb12-e91d-4997-8a44-d23a01ed8849
+	isActive: false
+	fromColumn: Clientes.IdCiudad
+	toColumn: geo_clean.IdCiudad
+
+relationship AutoDetected_742537ca-386f-4671-920b-cdf08e41da7f
+	isActive: false
+	fromColumn: Estaciones.IdCiudad
+	toColumn: geo_clean.IdCiudad
+
+relationship AutoDetected_c74a1ae1-4780-495c-b357-dae9029e83f4
+	fromColumn: customers_clean.IdCiudad
+	toColumn: geo_clean.IdCiudad
+
+relationship AutoDetected_fe4185a1-ce02-440b-a930-f2b54096edc0
+	fromColumn: estaciones_clean.IdCiudad
+	toColumn: geo_clean.IdCiudad
+

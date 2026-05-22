@@ -1,0 +1,39 @@
+table estaciones_clean
+	lineageTag: 737c6830-82c8-435d-a8f6-3d9998a8eae2
+
+	column IdEstacion
+		dataType: int64
+		formatString: 0
+		lineageTag: 7483a992-eb0c-4262-8c48-8aa9cd2efc0a
+		summarizeBy: none
+		sourceColumn: IdEstacion
+
+		annotation SummarizationSetBy = Automatic
+
+	column IdCiudad
+		dataType: int64
+		formatString: 0
+		lineageTag: 7066fd87-f4f5-477c-87b1-d015e88e6c54
+		summarizeBy: none
+		sourceColumn: IdCiudad
+
+		annotation SummarizationSetBy = Automatic
+
+	column TipoEstacion
+		dataType: string
+		lineageTag: d81c087f-7397-4273-86eb-53db481525c9
+		summarizeBy: none
+		sourceColumn: TipoEstacion
+
+		annotation SummarizationSetBy = Automatic
+
+	partition estaciones_clean = m
+		mode: import
+		source =
+				let
+				  Origen = Csv.Document(File.Contents("C:\Users\weizm\Downloads\PruebaAnlistaDatos\analisis_datos\output\estaciones_clean.csv"), [Delimiter = ",", Columns = 3, Encoding = 65001, QuoteStyle = QuoteStyle.None]),
+				  #"Encabezados promovidos" = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				  #"Tipo de columna cambiado" = Table.TransformColumnTypes(#"Encabezados promovidos", {{"IdEstacion", Int64.Type}, {"IdCiudad", Int64.Type}, {"TipoEstacion", type text}}, "es")
+				in
+				  #"Tipo de columna cambiado"
+

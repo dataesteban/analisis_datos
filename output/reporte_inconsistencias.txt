@@ -1,6 +1,6 @@
 =================================================================
   REPORTE DE INCONSISTENCIAS — On Daxelta
-  Generado: 2026-05-20 22:58:55
+  Generado: 2026-05-22 01:52:53
 =================================================================
 
 
@@ -18,7 +18,10 @@
   Edad calculada < 16 años (no deberían ser titulares)  → 114,774 registros
 
   [ADVERTENCIA]
-  Edad calculada > 90 años (verificar)  → 187,930 registros
+  Edad calculada > 100 años (probablemente error de captura)  → 187,826 registros
+
+  [INFO]
+  Edad calculada 91-100 años (adultos mayores — se conservan como confiables)  → 104 registros
 
   [ADVERTENCIA]
   Segmento NaN (nulo técnico)  → 1 registros
@@ -27,10 +30,13 @@
   Segmento 'Sin Segmento' literal en fuente (20.7% sin clasificar real)  → 165,542 registros
 
   [INFO]
-  FechaNacimiento NO confiable (marcada, no eliminada): 322,412 (40.2%)
+  FechaNacimiento NO confiable (marcada, no eliminada): 322,308 (40.2%)
+
+  [ADVERTENCIA]
+  Filas duplicadas eliminadas (mismo IdCliente): 1,421
 
   [INFO]
-  Distribución segmentos: {'SUSTENTO': 579136, 'Sin Segmento': 165543, 'RECORRIDO': 56494, 'NEGOCIO': 164}
+  Distribución segmentos: {'SUSTENTO': 577748, 'Sin Segmento': 165535, 'RECORRIDO': 56469, 'NEGOCIO': 164}
 
 ─────────────────────────────────────────────────────────────────
   ARCHIVO: Estaciones
@@ -115,15 +121,15 @@
 =================================================================
 
   ❌ Críticos     : 5
-  ⚠️  Advertencias : 12
-  ℹ️  Informativos : 10
+  ⚠️  Advertencias : 13
+  ℹ️  Informativos : 11
 
 
 =================================================================
   RECOMENDACIONES DE ESTANDARIZACIÓN
 =================================================================
   1. Definir un esquema de validación en origen para FechaNacimiento.
-     Rechazar fechas futuras o años de nacimiento > (año_actual - 16).
+     Rechazar fechas futuras o edades < 16 o > 100 (FechaNac_confiable=False).
   
   2. Corregir el header de Trans_2_Sem en el sistema fuente.
      El orden correcto de columnas es:

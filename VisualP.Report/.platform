@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "VisualP"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "05f8cb22-7378-4a5a-90a9-cada0f81ecf5"
+  }
+}

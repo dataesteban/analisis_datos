@@ -1,0 +1,178 @@
+table trans_clean
+	lineageTag: 4a05c086-eeee-49f7-9399-79c183c0ec13
+
+	column Placa
+		dataType: string
+		lineageTag: ddfdb8bf-4dfd-4297-9993-5ed5fef7f755
+		summarizeBy: none
+		sourceColumn: Placa
+
+		annotation SummarizationSetBy = Automatic
+
+	column IdCliente
+		dataType: int64
+		formatString: 0
+		lineageTag: 9af0f730-a2b6-469c-aa20-2f6a4d949849
+		summarizeBy: sum
+		sourceColumn: IdCliente
+
+		annotation SummarizationSetBy = Automatic
+
+	column IdEstacion
+		dataType: int64
+		formatString: 0
+		lineageTag: 40840896-4717-421d-ae8b-e15f30817638
+		summarizeBy: none
+		sourceColumn: IdEstacion
+
+		annotation SummarizationSetBy = Automatic
+
+	column ValorVenta
+		dataType: int64
+		formatString: 0
+		lineageTag: 1b66386b-a36f-4f27-b1a7-782ab7cefdb9
+		summarizeBy: sum
+		sourceColumn: ValorVenta
+
+		annotation SummarizationSetBy = Automatic
+
+	column Gal_Fid
+		dataType: int64
+		formatString: 0
+		lineageTag: a712c308-dba2-4dc6-a795-2eecbcb30599
+		summarizeBy: sum
+		sourceColumn: Gal_Fid
+
+		annotation SummarizationSetBy = Automatic
+
+	column Gal
+		dataType: int64
+		formatString: 0
+		lineageTag: 4cb1b680-f5ee-4d32-93cf-c42c916e5511
+		summarizeBy: sum
+		sourceColumn: Gal
+
+		annotation SummarizationSetBy = Automatic
+
+	column FechaVenta
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 1c8e12ba-1c7e-4f04-9b60-de93250c64f3
+		summarizeBy: none
+		sourceColumn: FechaVenta
+
+		variation Variación
+			isDefault
+			relationship: 00569a9d-0d96-4878-8d7a-86e24f7dfb00
+			defaultHierarchy: LocalDateTable_b4d85c89-4931-499e-9822-b9528731152e.'Jerarquía de fechas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column _fuente
+		dataType: string
+		lineageTag: 0117c470-68fe-40df-8e80-977a4b7bb7cb
+		summarizeBy: none
+		sourceColumn: _fuente
+
+		annotation SummarizationSetBy = Automatic
+
+	column cliente_identificado
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 275e6a36-27f8-4a50-9a58-d7e248d530ff
+		summarizeBy: none
+		sourceColumn: cliente_identificado
+
+		annotation SummarizationSetBy = Automatic
+
+	column outlier_valor
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: f3cf6856-0abc-466e-94cf-0f3a8706190b
+		summarizeBy: none
+		sourceColumn: outlier_valor
+
+		annotation SummarizationSetBy = Automatic
+
+	column outlier_gal
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: c74f71aa-52ab-4a8a-be03-1588f32a9941
+		summarizeBy: none
+		sourceColumn: outlier_gal
+
+		annotation SummarizationSetBy = Automatic
+
+	column DiaSemana
+		dataType: string
+		lineageTag: 0a2a1477-7174-4fdb-b2f5-4d5841b9911e
+		summarizeBy: none
+		sourceColumn: DiaSemana
+
+		annotation SummarizationSetBy = Automatic
+
+	column NumeroDia
+		dataType: int64
+		formatString: 0
+		lineageTag: e70a6855-55cd-447a-8f48-1330d6208dbc
+		summarizeBy: sum
+		sourceColumn: NumeroDia
+
+		annotation SummarizationSetBy = Automatic
+
+	column Semana
+		dataType: int64
+		formatString: 0
+		lineageTag: c98e453d-30e3-4a89-b58c-6d5df49d0689
+		summarizeBy: sum
+		sourceColumn: Semana
+
+		annotation SummarizationSetBy = Automatic
+
+	column Mes
+		dataType: int64
+		formatString: 0
+		lineageTag: 8ebec459-a092-4205-8d54-b20dbfd6c64b
+		summarizeBy: sum
+		sourceColumn: Mes
+
+		annotation SummarizationSetBy = Automatic
+
+	column Anio
+		dataType: int64
+		formatString: 0
+		lineageTag: 265810a8-e5bf-45ba-a10b-fe909591fcfd
+		summarizeBy: sum
+		sourceColumn: Anio
+
+		annotation SummarizationSetBy = Automatic
+
+	column DiaSemana_ES
+		dataType: string
+		lineageTag: 21fb13c5-7ef3-4a98-81da-fe5f09b07cfa
+		summarizeBy: none
+		sourceColumn: DiaSemana_ES
+
+		annotation SummarizationSetBy = Automatic
+
+	column PrecioXGalon
+		dataType: int64
+		formatString: 0
+		lineageTag: 1dca539c-8b06-4d34-ac08-8be60d4fb9a1
+		summarizeBy: sum
+		sourceColumn: PrecioXGalon
+
+		annotation SummarizationSetBy = Automatic
+
+	partition trans_clean = m
+		mode: import
+		source =
+				let
+				  Origen = Csv.Document(File.Contents("C:\Users\weizm\Downloads\PruebaAnlistaDatos\analisis_datos\output\trans_clean.csv"), [Delimiter = ",", Columns = 18, Encoding = 65001, QuoteStyle = QuoteStyle.None]),
+				  #"Encabezados promovidos" = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				  #"Tipo de columna cambiado" = Table.TransformColumnTypes(#"Encabezados promovidos", {{"Placa", type text}, {"IdCliente", Int64.Type}, {"IdEstacion", Int64.Type}, {"ValorVenta", Int64.Type}, {"Gal_Fid", Int64.Type}, {"Gal", Int64.Type}, {"FechaVenta", type date}, {"_fuente", type text}, {"cliente_identificado", type logical}, {"outlier_valor", type logical}, {"outlier_gal", type logical}, {"DiaSemana", type text}, {"NumeroDia", Int64.Type}, {"Semana", Int64.Type}, {"Mes", Int64.Type}, {"Anio", Int64.Type}, {"DiaSemana_ES", type text}, {"PrecioXGalon", Int64.Type}}, "es")
+				in
+				  #"Tipo de columna cambiado"
+

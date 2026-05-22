@@ -1,0 +1,135 @@
+table Trans
+	lineageTag: 93f4c62d-608f-4256-8877-8146a968476d
+
+	column Placa
+		dataType: string
+		lineageTag: dbcadd19-cc15-4419-9df1-6401cf8f237e
+		summarizeBy: none
+		sourceColumn: Placa
+
+	column IdCliente
+		dataType: int64
+		isHidden
+		lineageTag: 352bd3ac-922d-4941-bf99-fe9e6ef7a487
+		summarizeBy: none
+		sourceColumn: IdCliente
+
+	column IdEstacion
+		dataType: int64
+		isHidden
+		lineageTag: 3291e777-bb2e-4f11-a917-ec094623a76e
+		summarizeBy: none
+		sourceColumn: IdEstacion
+
+	column ValorVenta
+		dataType: double
+		lineageTag: 21903ba9-9d51-4477-accc-f8ea6f28f1f8
+		summarizeBy: none
+		sourceColumn: ValorVenta
+
+	column Gal_Fid
+		dataType: double
+		lineageTag: b86d5e78-1191-4c5f-87d1-2efc755ef1e8
+		summarizeBy: none
+		sourceColumn: Gal_Fid
+
+	column Gal
+		dataType: double
+		lineageTag: ba57f18e-ac8b-46b5-8117-bfb0a364b89b
+		summarizeBy: none
+		sourceColumn: Gal
+
+	column FechaVenta
+		dataType: dateTime
+		isHidden
+		formatString: Short Date
+		lineageTag: c51918cc-0140-4139-a8eb-37e22b45f9ab
+		summarizeBy: none
+		sourceColumn: FechaVenta
+
+		changedProperty = DataType
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column _fuente
+		dataType: string
+		lineageTag: 41d66358-e82f-4d18-9199-28d138e44482
+		summarizeBy: none
+		sourceColumn: _fuente
+
+	column cliente_identificado
+		dataType: boolean
+		lineageTag: 4a5cc0b4-66be-4f80-b44d-acde0638f23b
+		summarizeBy: none
+		sourceColumn: cliente_identificado
+
+	column outlier_valor
+		dataType: boolean
+		lineageTag: 6d0027f1-9c24-4730-8bb4-ad397fc9fb7b
+		summarizeBy: none
+		sourceColumn: outlier_valor
+
+	column outlier_gal
+		dataType: boolean
+		lineageTag: 589880a2-54b8-4d3a-878b-c52a31108bcc
+		summarizeBy: none
+		sourceColumn: outlier_gal
+
+	column DiaSemana
+		dataType: string
+		isHidden
+		lineageTag: 3ea4c33a-c3b9-435b-8b80-61fed4a311b3
+		summarizeBy: none
+		sourceColumn: DiaSemana
+
+	column NumeroDia
+		dataType: int64
+		isHidden
+		lineageTag: 56d6724e-7292-4a54-bd08-5f8c0564e8db
+		summarizeBy: none
+		sourceColumn: NumeroDia
+
+	column Semana
+		dataType: int64
+		isHidden
+		lineageTag: 26711aaf-fd06-4a58-a1f9-be07df53eecb
+		summarizeBy: none
+		sourceColumn: Semana
+
+	column Mes
+		dataType: int64
+		isHidden
+		lineageTag: 6fbf47dd-df88-48ca-adeb-74cb6fa332e7
+		summarizeBy: none
+		sourceColumn: Mes
+
+	column Anio
+		dataType: int64
+		isHidden
+		lineageTag: b93f2876-8355-44af-9932-aba7c8df7fae
+		summarizeBy: none
+		sourceColumn: Anio
+
+	column DiaSemana_ES
+		dataType: string
+		isHidden
+		lineageTag: 8be689bc-6009-49cc-89f6-52b6d7019080
+		summarizeBy: none
+		sourceColumn: DiaSemana_ES
+
+	column PrecioXGalon
+		dataType: double
+		lineageTag: 64d28efe-1972-4361-bf07-fa0e56620297
+		summarizeBy: none
+		sourceColumn: PrecioXGalon
+
+	partition Trans = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(File.Contents("C:\Users\weizm\Downloads\PruebaAnlistaDatos\analisis_datos\output\trans_clean.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    Tipos = Table.TransformColumnTypes(Encabezados, {{"Placa", type text}, {"IdCliente", Int64.Type}, {"IdEstacion", Int64.Type}, {"ValorVenta", type number}, {"Gal_Fid", type number}, {"Gal", type number}, {"FechaVenta", type datetime}, {"_fuente", type text}, {"cliente_identificado", type logical}, {"outlier_valor", type logical}, {"outlier_gal", type logical}, {"DiaSemana", type text}, {"NumeroDia", Int64.Type}, {"Semana", Int64.Type}, {"Mes", Int64.Type}, {"Anio", Int64.Type}, {"DiaSemana_ES", type text}, {"PrecioXGalon", type number}})
+				in
+				    Tipos
+

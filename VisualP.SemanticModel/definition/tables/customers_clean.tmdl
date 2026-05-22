@@ -1,0 +1,72 @@
+table customers_clean
+	lineageTag: e9f330e0-65f3-4973-b257-a0e8e1c23a72
+
+	column IdCliente
+		dataType: int64
+		formatString: 0
+		lineageTag: 922aa0a4-6b07-4509-905c-231042638c9a
+		summarizeBy: sum
+		sourceColumn: IdCliente
+
+		annotation SummarizationSetBy = Automatic
+
+	column Segmento
+		dataType: string
+		lineageTag: fb8d0ba1-1853-4721-8752-334ca7966fb3
+		summarizeBy: none
+		sourceColumn: Segmento
+
+		annotation SummarizationSetBy = Automatic
+
+	column IdCiudad
+		dataType: int64
+		formatString: 0
+		lineageTag: 4e7a2b55-a844-4b85-b849-2fb6d05a85f8
+		summarizeBy: none
+		sourceColumn: IdCiudad
+
+		annotation SummarizationSetBy = Automatic
+
+	column FechaNacimiento
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 35cac9c3-b281-4bc9-a412-28f84a611863
+		summarizeBy: none
+		sourceColumn: FechaNacimiento
+
+		variation Variación
+			isDefault
+			relationship: 517d4d38-c467-41a6-88a0-85fdd93671f7
+			defaultHierarchy: LocalDateTable_d20839ee-92b0-459e-8567-75a25a69c844.'Jerarquía de fechas'
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column FechaNac_confiable
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 106d2141-b021-40df-91cf-9e4ca1721b5d
+		summarizeBy: none
+		sourceColumn: FechaNac_confiable
+
+		annotation SummarizationSetBy = Automatic
+
+	column Edad
+		dataType: double
+		lineageTag: 79862319-6f58-4951-a389-805ca640a024
+		summarizeBy: none
+		sourceColumn: Edad
+
+		annotation SummarizationSetBy = Automatic
+
+	partition customers_clean = m
+		mode: import
+		source =
+				let
+				  Origen = Csv.Document(File.Contents("C:\Users\weizm\Downloads\PruebaAnlistaDatos\analisis_datos\output\customers_clean.csv"), [Delimiter = ",", Columns = 6, Encoding = 65001, QuoteStyle = QuoteStyle.None]),
+				  #"Encabezados promovidos" = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				  #"Tipo de columna cambiado" = Table.TransformColumnTypes(#"Encabezados promovidos", {{"IdCliente", Int64.Type}, {"Segmento", type text}, {"IdCiudad", Int64.Type}, {"FechaNacimiento", type date}, {"FechaNac_confiable", type logical}, {"Edad", type number}}, "es")
+				in
+				  #"Tipo de columna cambiado"
+

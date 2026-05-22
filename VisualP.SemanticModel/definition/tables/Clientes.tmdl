@@ -1,0 +1,122 @@
+table Clientes
+	lineageTag: deb9f67b-6d18-4e64-aaad-a49ca6f3fcee
+
+	column IdCliente
+		dataType: int64
+		isHidden
+		lineageTag: 6ae53f50-508c-4a69-848d-6d54e8c0866d
+		summarizeBy: none
+		sourceColumn: IdCliente
+
+	column Segmento
+		dataType: string
+		lineageTag: a9e8916b-8f6f-4b0e-9e1e-83f96081ad93
+		summarizeBy: none
+		sourceColumn: Segmento
+
+	column IdCiudad
+		dataType: int64
+		isHidden
+		lineageTag: 8b55e5ab-94d6-4dae-9a80-390d794e4dec
+		summarizeBy: none
+		sourceColumn: IdCiudad
+
+		annotation SummarizationSetBy = Automatic
+
+	column FechaNacimiento
+		dataType: dateTime
+		formatString: Short Date
+		lineageTag: 096de082-52a0-4b15-a810-9626353a1819
+		summarizeBy: none
+		sourceColumn: FechaNacimiento
+
+		variation Variación
+			isDefault
+			relationship: 8f4d89d0-b316-4290-9446-fbf15a355cc6
+			defaultHierarchy: LocalDateTable_fdbdc1a7-2950-41b4-aeed-04271f604eff.'Jerarquía de fechas'
+
+		changedProperty = DataType
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column FechaNac_confiable
+		dataType: boolean
+		lineageTag: a269da38-5e93-4de3-9e54-b67db056f47e
+		summarizeBy: none
+		sourceColumn: FechaNac_confiable
+
+	column Edad
+		dataType: double
+		lineageTag: 90387bcf-2924-47ec-a0dc-e9bd1b3540ca
+		summarizeBy: sum
+		sourceColumn: Edad
+
+		annotation SummarizationSetBy = Automatic
+
+	column Frecuencia = CALCULATE(COUNTROWS(Trans), Trans[cliente_identificado]=TRUE())
+		lineageTag: 32d2e713-203a-4f4d-ab60-e4faabf00bec
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column Monetario = CALCULATE(SUM(Trans[ValorVenta]), Trans[cliente_identificado]=TRUE())
+		lineageTag: f5422379-2e64-4f35-865a-de25304c497e
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column Recencia = VAR Ultima = CALCULATE(MAX(Trans[FechaVenta]), Trans[cliente_identificado]=TRUE()) VAR FechaRef = MAXX(ALL(Trans), Trans[FechaVenta]) RETURN IF(ISBLANK(Ultima), BLANK(), DATEDIFF(Ultima, FechaRef, DAY))
+		lineageTag: 67ba974c-ef3e-42b4-a4ec-44f59a0658e7
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column NumPlacas = CALCULATE(DISTINCTCOUNT(Trans[Placa]), Trans[cliente_identificado]=TRUE())
+		lineageTag: b7529d4d-8f32-4ed1-9919-bda8848253df
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'R Score' = SWITCH(TRUE(), ISBLANK(Clientes[Recencia]), BLANK(), Clientes[Recencia]=0, 5, Clientes[Recencia]=1, 4, Clientes[Recencia]=2, 3, Clientes[Recencia]<=4, 2, 1)
+		lineageTag: 42a37d0b-4a95-4bcb-ac7a-c7ca89850cd5
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'F Score' = IF(Clientes[Frecuencia]>0, VAR Activos = FILTER(ALL(Clientes), Clientes[Frecuencia]>0) VAR Total = COUNTROWS(Activos) VAR Pos = RANKX(Activos, Clientes[Frecuencia], , ASC) RETURN SWITCH(TRUE(), Pos<=Total*0.2, 1, Pos<=Total*0.4, 2, Pos<=Total*0.6, 3, Pos<=Total*0.8, 4, 5))
+		lineageTag: 282f9bfc-c8ee-470c-827f-896d8107d9e1
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'M Score' = IF(Clientes[Monetario]>0, VAR Activos = FILTER(ALL(Clientes), Clientes[Monetario]>0) VAR Total = COUNTROWS(Activos) VAR Pos = RANKX(Activos, Clientes[Monetario], , ASC) RETURN SWITCH(TRUE(), Pos<=Total*0.2, 1, Pos<=Total*0.4, 2, Pos<=Total*0.6, 3, Pos<=Total*0.8, 4, 5))
+		lineageTag: f79fb612-5fa4-4a9d-93d1-5df73d783b97
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'RFM Score' = Clientes[R Score] + Clientes[F Score] + Clientes[M Score]
+		isHidden
+		lineageTag: 78037486-b000-4046-bcb7-0095e71e1490
+		summarizeBy: sum
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Segmento RFM' = VAR R = Clientes[R Score] VAR F = Clientes[F Score] VAR M = Clientes[M Score] RETURN SWITCH(TRUE(), ISBLANK(R) || ISBLANK(F) || ISBLANK(M), "Sin actividad", R>=4 && F>=4 && M>=4, "Champions", R>=4 && F>=3 && M>=3, "Leales", R>=4 && F<=2, "Nuevos", R>=3 && F>=3 && M<=2, "Frecuentes bajo valor", R<=2 && F>=4 && M>=4, "No puedo perderlos", R<=2 && F>=3, "En riesgo", R<=2 && F<=2 && M>=4, "Grandes durmiendo", R<=2 && F<=2, "Hibernando", R+F+M>=9, "Potencial leal", "Necesitan atencion")
+		lineageTag: dd65b0c0-0379-450a-8fd0-e8d68838d944
+		summarizeBy: none
+
+	column EsFlota = IF(Clientes[NumPlacas]>=4, "Flota", "Particular")
+		lineageTag: aed61e12-a17e-4cae-ae59-72a780dc1635
+		summarizeBy: none
+
+	partition Clientes = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(File.Contents("C:\Users\weizm\Downloads\PruebaAnlistaDatos\analisis_datos\output\customers_clean.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    Tipos = Table.TransformColumnTypes(Encabezados, {{"IdCliente", Int64.Type}, {"Segmento", type text}, {"IdCiudad", Int64.Type}, {"FechaNacimiento", type datetime}, {"FechaNac_confiable", type logical}, {"Edad", type number}})
+				in
+				    Tipos
+

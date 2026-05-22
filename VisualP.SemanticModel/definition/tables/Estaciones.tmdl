@@ -1,0 +1,33 @@
+table Estaciones
+	lineageTag: 0a69f8be-0463-43b6-af89-52f644c91fd2
+
+	column IdEstacion
+		dataType: int64
+		isHidden
+		lineageTag: 5ae273c9-674b-4ff6-93b8-ca7e5c820423
+		summarizeBy: none
+		sourceColumn: IdEstacion
+
+	column IdCiudad
+		dataType: int64
+		isHidden
+		lineageTag: 284635fd-28e3-4bf5-bda7-70e96213bf28
+		summarizeBy: none
+		sourceColumn: IdCiudad
+
+	column TipoEstacion
+		dataType: string
+		lineageTag: 89d22718-448c-4fea-beff-7abe409b5a9e
+		summarizeBy: none
+		sourceColumn: TipoEstacion
+
+	partition Estaciones = m
+		mode: import
+		source =
+				let
+				    Origen = Csv.Document(File.Contents("C:\Users\weizm\Downloads\PruebaAnlistaDatos\analisis_datos\output\estaciones_clean.csv"), [Delimiter=",", Encoding=65001, QuoteStyle=QuoteStyle.Csv]),
+				    Encabezados = Table.PromoteHeaders(Origen, [PromoteAllScalars=true]),
+				    Tipos = Table.TransformColumnTypes(Encabezados, {{"IdEstacion", Int64.Type}, {"IdCiudad", Int64.Type}, {"TipoEstacion", type text}})
+				in
+				    Tipos
+

@@ -1,0 +1,47 @@
+table geo_clean
+	lineageTag: 958b45ee-243c-41ab-b8ce-651af1403191
+
+	column NombreDpto
+		dataType: string
+		lineageTag: 1b6d2c78-e04b-4ea5-941f-bc97803aca6f
+		summarizeBy: none
+		sourceColumn: NombreDpto
+
+		annotation SummarizationSetBy = Automatic
+
+	column IdCiudad
+		dataType: int64
+		formatString: 0
+		lineageTag: b117a0e6-595c-43d4-b6b5-ab7840bae72b
+		summarizeBy: none
+		sourceColumn: IdCiudad
+
+		annotation SummarizationSetBy = Automatic
+
+	column NombreCiudad
+		dataType: string
+		lineageTag: 2445b3dd-e712-4f8c-9225-1f317ecc5299
+		summarizeBy: none
+		sourceColumn: NombreCiudad
+
+		annotation SummarizationSetBy = Automatic
+
+	column EsInternacional
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: b0cea396-05ef-4af5-96f4-042b7a70322b
+		summarizeBy: none
+		sourceColumn: EsInternacional
+
+		annotation SummarizationSetBy = Automatic
+
+	partition geo_clean = m
+		mode: import
+		source =
+				let
+				  Origen = Csv.Document(File.Contents("C:\Users\weizm\Downloads\PruebaAnlistaDatos\analisis_datos\output\geo_clean.csv"), [Delimiter = ",", Columns = 4, Encoding = 65001, QuoteStyle = QuoteStyle.None]),
+				  #"Encabezados promovidos" = Table.PromoteHeaders(Origen, [PromoteAllScalars = true]),
+				  #"Tipo de columna cambiado" = Table.TransformColumnTypes(#"Encabezados promovidos", {{"NombreDpto", type text}, {"IdCiudad", Int64.Type}, {"NombreCiudad", type text}, {"EsInternacional", type logical}}, "es")
+				in
+				  #"Tipo de columna cambiado"
+

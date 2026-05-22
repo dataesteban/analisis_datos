@@ -1,0 +1,314 @@
+table _Medidas
+	isHidden
+	lineageTag: e74b0a21-7eeb-48b1-a4a8-cba13416227e
+
+	measure 'Total Galones' = SUM(Trans[Gal])
+		formatString: #,##0
+		displayFolder: 01 Base
+		lineageTag: f866977b-689d-4647-a1f9-44de9e8c1a64
+
+	measure 'Valor Venta' = SUM(Trans[ValorVenta])
+		formatString: $#,##0
+		displayFolder: 01 Base
+		lineageTag: a88db17f-e86e-4c4a-853b-b0bb2cfea903
+
+	measure 'Total Tickets' = COUNTROWS(Trans)
+		formatString: #,##0
+		displayFolder: 01 Base
+		lineageTag: 53249d29-a449-4344-9656-0d20269fac9a
+
+	measure 'Clientes Unicos' = DISTINCTCOUNT(Trans[IdCliente])
+		formatString: #,##0
+		displayFolder: 01 Base
+		lineageTag: a7b1bf8a-cf24-4b89-9c08-d6a00c3976b1
+
+	measure 'Total Clientes' = DISTINCTCOUNT(Clientes[IdCliente])
+		formatString: #,##0
+		displayFolder: 01 Base
+		lineageTag: 411dabae-7e11-4345-b638-35f42c2c19b5
+
+	measure 'Ticket Promedio' = DIVIDE([Valor Venta], [Total Tickets])
+		formatString: $#,##0
+		displayFolder: 01 Base
+		lineageTag: 3bfbb0ba-319d-4b1f-b89c-0dfda94161ac
+
+	measure 'Gal por Tx' = DIVIDE([Total Galones], [Total Tickets])
+		formatString: #,##0.00
+		displayFolder: 01 Base
+		lineageTag: 2a286375-44d9-4fec-a5c5-a62185d27504
+
+	measure 'Estaciones Activas' = DISTINCTCOUNT(Trans[IdEstacion])
+		formatString: #,##0
+		displayFolder: 01 Base
+		lineageTag: 9e736ba0-b20c-4e4f-b19d-122c8289816d
+
+	measure 'Valor por Estacion' = DIVIDE([Valor Venta], [Estaciones Activas])
+		formatString: $#,##0
+		displayFolder: 01 Base
+		lineageTag: ecece842-0189-41e4-b25c-c22393f32da3
+
+	measure 'Pct Galones Dia' = DIVIDE([Total Galones], CALCULATE([Total Galones], ALL(Calendario[NombreDia])))
+		formatString: 0.0%
+		displayFolder: 02 Volumetria dia
+		lineageTag: 831ca596-b90b-43e9-b144-4aa184f13a64
+
+	measure 'Pct Valor Dia' = DIVIDE([Valor Venta], CALCULATE([Valor Venta], ALL(Calendario[NombreDia])))
+		formatString: 0.0%
+		displayFolder: 02 Volumetria dia
+		lineageTag: 1b877f45-6019-4526-9846-9318a2e7cd84
+
+	measure 'Ranking Dia Gal' = RANKX(ALL(Calendario[NombreDia]), [Total Galones], , DESC, DENSE)
+		formatString: 0
+		displayFolder: 02 Volumetria dia
+		lineageTag: e785600d-2511-4383-9dbf-5e99f4e02398
+
+	measure 'Brecha Pico Valle Gal' = VAR Maximo = MAXX(ALL(Calendario[NombreDia]), [Total Galones]) VAR Minimo = MINX(ALL(Calendario[NombreDia]), [Total Galones]) RETURN DIVIDE(Maximo - Minimo, Minimo)
+		formatString: 0.0%
+		displayFolder: 02 Volumetria dia
+		lineageTag: 77140e14-1e88-41e9-b790-3c416ecf8ef5
+
+	measure 'Valor Promedio Diario' = AVERAGEX(VALUES(Calendario[Fecha]), [Valor Venta])
+		formatString: $#,##0
+		displayFolder: 03 Forecast
+		lineageTag: 5f69ebb7-2e09-4c83-ae4c-2b26ae01cd48
+
+	measure 'CV Valor' = DIVIDE(STDEVX.S(VALUES(Calendario[Fecha]), [Valor Venta]), [Valor Promedio Diario])
+		formatString: 0.0%
+		displayFolder: 03 Forecast
+		lineageTag: 8a9b4e8f-c5f2-43b3-be20-ee6b6789125d
+
+	measure 'Forecast Valor' = VAR FechaActual = SELECTEDVALUE(Forecast[Fecha]) VAR FechaReferencia = FechaActual - 7 RETURN CALCULATE([Valor Venta], Calendario[Fecha] = FechaReferencia)
+		formatString: $#,##0
+		displayFolder: 03 Forecast
+		lineageTag: 385b6e4c-e218-46d1-ab74-ff195f6d9a83
+
+	measure 'Forecast Valor Min' = [Forecast Valor] * (1 - [CV Valor])
+		formatString: $#,##0
+		displayFolder: 03 Forecast
+		lineageTag: 31737493-947c-46a3-8e8e-2f2ac81a79dd
+
+	measure 'Forecast Valor Max' = [Forecast Valor] * (1 + [CV Valor])
+		formatString: $#,##0
+		displayFolder: 03 Forecast
+		lineageTag: 2ff82fe4-51a8-4dc2-8906-cf0b5c8f0c2f
+
+	measure 'Gal Promedio Diario' = AVERAGEX(VALUES(Calendario[Fecha]), [Total Galones])
+		formatString: #,##0
+		displayFolder: 03 Forecast
+		lineageTag: 515f47fc-405d-42f3-957e-5277b9a2b2a9
+
+	measure 'CV Galones' = DIVIDE(STDEVX.S(VALUES(Calendario[Fecha]), [Total Galones]), [Gal Promedio Diario])
+		formatString: 0.0%
+		displayFolder: 03 Forecast
+		lineageTag: ce4fbf5e-bf71-49e5-908c-b420fbfa4716
+
+	measure 'Forecast Galones' = VAR FechaActual = SELECTEDVALUE(Forecast[Fecha]) VAR FechaReferencia = FechaActual - 7 RETURN CALCULATE([Total Galones], Calendario[Fecha] = FechaReferencia)
+		formatString: #,##0
+		displayFolder: 03 Forecast
+		lineageTag: 7ab8e457-684a-46e9-890f-e5b99637864d
+
+	measure 'Forecast Galones Min' = [Forecast Galones] * (1 - [CV Galones])
+		formatString: #,##0
+		displayFolder: 03 Forecast
+		lineageTag: a1e4a383-617d-413a-9f47-cfb28ab1d2f5
+
+	measure 'Forecast Galones Max' = [Forecast Galones] * (1 + [CV Galones])
+		formatString: #,##0
+		displayFolder: 03 Forecast
+		lineageTag: f281dda7-83ad-4e9f-85b9-2aed7e1e8fc9
+
+	measure 'Pct Valor Dpto' = DIVIDE([Valor Venta], CALCULATE([Valor Venta], ALL(Geo[NombreDpto])))
+		formatString: 0.0%
+		displayFolder: 04 Regional
+		lineageTag: c5e7c548-09cc-47cd-b229-a65085524d77
+
+	measure 'Ranking Dpto' = RANKX(ALL(Geo[NombreDpto]), [Valor Venta], , DESC, DENSE)
+		formatString: 0
+		displayFolder: 04 Regional
+		lineageTag: a1bea98a-5701-4e8b-a76a-24eb05ca76c3
+
+	measure 'Pct Acumulado Dpto' = VAR ValorActual = [Valor Venta] VAR Tabla = ADDCOLUMNS(ALL(Geo[NombreDpto]), "@Val", [Valor Venta]) RETURN DIVIDE(SUMX(FILTER(Tabla, [@Val] >= ValorActual), [@Val]), SUMX(Tabla, [@Val]))
+		formatString: 0.0%
+		displayFolder: 04 Regional
+		lineageTag: a3d7be6c-49fa-49c5-88ca-aa9ed8c15d8b
+
+	measure 'Es Top 7 Dpto' = IF([Ranking Dpto] <= 7, "Top 7 (80%)", "Resto")
+		displayFolder: 04 Regional
+		lineageTag: 6ad830e5-7066-4520-8fd6-a4f76dae50e4
+
+	measure 'Tx Identificadas' = CALCULATE([Total Tickets], Trans[cliente_identificado]=TRUE())
+		formatString: #,##0
+		displayFolder: 05 Estaciones
+		lineageTag: da7b63cd-e9f7-4e80-9f41-e3548b22e6fc
+
+	measure 'Pct Fidelizacion' = DIVIDE([Tx Identificadas], [Total Tickets])
+		formatString: 0.0%
+		displayFolder: 05 Estaciones
+		lineageTag: ce934974-3bc9-4e15-8ab1-3695f4a3d8a8
+
+	measure 'Pct Valor Estacion' = DIVIDE([Valor Venta], CALCULATE([Valor Venta], ALL(Estaciones[IdEstacion])))
+		formatString: 0.0%
+		displayFolder: 05 Estaciones
+		lineageTag: 07101132-55a1-40a4-919e-f8a6bba91d7d
+
+	measure 'Ranking Estacion' = RANKX(ALL(Estaciones[IdEstacion]), [Valor Venta], , DESC, DENSE)
+		formatString: 0
+		displayFolder: 05 Estaciones
+		lineageTag: 705f8857-1577-4764-8391-2f9b6b141423
+
+	measure 'Pct Acumulado Estacion' = VAR ValorActual = [Valor Venta] VAR Tabla = ADDCOLUMNS(ALL(Estaciones[IdEstacion]), "@Val", [Valor Venta]) RETURN DIVIDE(SUMX(FILTER(Tabla, [@Val] >= ValorActual), [@Val]), SUMX(Tabla, [@Val]))
+		formatString: 0.0%
+		displayFolder: 05 Estaciones
+		lineageTag: 55221f6f-61a9-4002-a7f5-31fe2026135c
+
+	measure 'Es Top Pareto' = IF([Pct Acumulado Estacion] <= 0.8, "Top 80%", "Cola 20%")
+		displayFolder: 05 Estaciones
+		lineageTag: 44517bad-9a2c-4748-8eb1-70cfaa44b6e2
+
+	measure 'Estaciones Maestro' = COUNTROWS(Estaciones)
+		formatString: #,##0
+		displayFolder: 05 Estaciones
+		lineageTag: 7f142067-4911-48cc-9918-71b12b2d89d4
+
+	measure 'Estaciones Inactivas' = [Estaciones Maestro] - [Estaciones Activas]
+		formatString: #,##0
+		displayFolder: 05 Estaciones
+		lineageTag: 0aa76090-2fd3-470e-9acd-3ae7f937cd6b
+
+	measure 'Pct Cobertura' = DIVIDE([Estaciones Activas], [Estaciones Maestro])
+		formatString: 0.0%
+		displayFolder: 05 Estaciones
+		lineageTag: f065fb05-3857-485d-814e-003149f6fab5
+
+	measure 'Valor por Estacion Global' = CALCULATE([Valor por Estacion], ALL(Estaciones[TipoEstacion]))
+		formatString: $#,##0
+		displayFolder: 05 Estaciones
+		lineageTag: 99a70004-9270-47cd-b121-9f48d2b5dd25
+
+	measure 'Indice vs Global' = DIVIDE([Valor por Estacion], [Valor por Estacion Global])
+		formatString: 0.00
+		displayFolder: 05 Estaciones
+		lineageTag: 593a1201-31df-4b25-a943-67c785a0bfd2
+
+	measure 'Pct Clientes Segmento' = DIVIDE([Total Clientes], CALCULATE([Total Clientes], ALL(Clientes[Segmento RFM])))
+		formatString: 0.0%
+		displayFolder: 06 RFM
+		lineageTag: 45ed2d80-1481-4124-950c-8fca800dae8d
+
+	measure 'Pct Valor Segmento' = DIVIDE([Valor Venta], CALCULATE([Valor Venta], ALL(Clientes[Segmento RFM])))
+		formatString: 0.0%
+		displayFolder: 06 RFM
+		lineageTag: 1481093b-4dec-4723-9141-e1837b74b8cd
+
+	measure 'Valor Promedio Cliente' = DIVIDE([Valor Venta], [Total Clientes])
+		formatString: $#,##0
+		displayFolder: 06 RFM
+		lineageTag: 13c9ba15-4054-40c6-96e0-e4dca4dd10d2
+
+	measure 'Ranking Cliente' = RANKX(ALL(Clientes[IdCliente]), [Valor Venta], , DESC, DENSE)
+		formatString: 0
+		displayFolder: 07 Top clientes
+		lineageTag: fe76f987-6b32-41fe-8bcb-d68a3290fbdf
+
+	measure 'Pct Cliente Acumulado' = DIVIDE([Ranking Cliente], CALCULATE(DISTINCTCOUNT(Clientes[IdCliente]), ALL(Clientes)))
+		formatString: 0.0%
+		displayFolder: 07 Top clientes
+		lineageTag: a1a0bae9-02d5-462d-b688-08befd42a158
+
+	measure 'Es Top 1 Pct' = IF([Pct Cliente Acumulado] <= 0.01, "Top 1%", IF([Pct Cliente Acumulado] <= 0.1, "Top 10%", IF([Pct Cliente Acumulado] <= 0.2, "Top 20%", "Resto")))
+		displayFolder: 07 Top clientes
+		lineageTag: c48a603d-c056-4b56-a05d-4290158acf73
+
+	measure 'Pct Valor Acumulado Cliente' = VAR ValorActual = [Valor Venta] VAR Tabla = ADDCOLUMNS(ALL(Clientes[IdCliente]), "@Val", [Valor Venta]) RETURN DIVIDE(SUMX(FILTER(Tabla, [@Val] >= ValorActual), [@Val]), SUMX(Tabla, [@Val]))
+		formatString: 0.0%
+		displayFolder: 07 Top clientes
+		lineageTag: 2194f027-9c5f-443d-b129-ff60943c83ee
+
+	measure 'Frecuencia Promedio' = AVERAGEX(VALUES(Clientes[IdCliente]), [Total Tickets])
+		formatString: #,##0.0
+		displayFolder: 07 Top clientes
+		lineageTag: ecedbab1-9652-4d17-9772-073374f63172
+
+	measure 'Pct Flotas en Tramo' = DIVIDE(CALCULATE(DISTINCTCOUNT(Clientes[IdCliente]), Clientes[EsFlota]="Flota"), DISTINCTCOUNT(Clientes[IdCliente]))
+		formatString: 0.0%
+		displayFolder: 07 Top clientes
+		lineageTag: 2810c7c2-e588-4513-a641-f3971d279a5c
+
+	measure 'Valor No Atribuible' = CALCULATE(SUM(Trans[ValorVenta]), Trans[cliente_identificado]=FALSE())
+		formatString: $#,##0
+		displayFolder: 07 Top clientes
+		lineageTag: aeb2ffbd-225f-40e2-ae47-aff300a67c04
+
+	measure 'Pct No Atribuible' = DIVIDE([Valor No Atribuible], SUM(Trans[ValorVenta]))
+		formatString: 0.0%
+		displayFolder: 07 Top clientes
+		lineageTag: be60b472-5606-4d43-b334-487baf46514b
+
+	measure 'Oportunidad Captura 50pct' = [Valor No Atribuible] * 0.5
+		formatString: $#,##0
+		displayFolder: 07 Top clientes
+		lineageTag: 9e7b9398-6c83-467a-8833-f763f5da6603
+
+	measure 'Edad Promedio' =
+			VAR AnoRef = 2017
+			RETURN
+			AVERAGEX(
+			    FILTER(
+			        Clientes,
+			        NOT ISBLANK(Clientes[FechaNacimiento])
+			            && (AnoRef - YEAR(Clientes[FechaNacimiento])) >= 16
+			            && (AnoRef - YEAR(Clientes[FechaNacimiento])) <= 100
+			    ),
+			    AnoRef - YEAR(Clientes[FechaNacimiento])
+			)
+		formatString: #,##0.0
+		displayFolder: 08 Edad
+		lineageTag: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+
+	measure 'Pct FechaNac Confiable' =
+			VAR AnoRef = 2017
+			VAR Confiables =
+			    COUNTROWS(
+			        FILTER(
+			            Clientes,
+			            NOT ISBLANK(Clientes[FechaNacimiento])
+			                && (AnoRef - YEAR(Clientes[FechaNacimiento])) >= 16
+			                && (AnoRef - YEAR(Clientes[FechaNacimiento])) <= 100
+			        )
+			    )
+			RETURN DIVIDE(Confiables, COUNTROWS(Clientes))
+		formatString: 0.0%
+		displayFolder: 08 Edad
+		lineageTag: b2c3d4e5-f6a7-8901-bcde-f12345678901
+
+	measure 'Clientes Con Edad' =
+			VAR AnoRef = 2017
+			RETURN
+			COUNTROWS(
+			    FILTER(
+			        Clientes,
+			        NOT ISBLANK(Clientes[FechaNacimiento])
+			            && (AnoRef - YEAR(Clientes[FechaNacimiento])) >= 16
+			            && (AnoRef - YEAR(Clientes[FechaNacimiento])) <= 100
+			    )
+			)
+		formatString: #,##0
+		displayFolder: 08 Edad
+		lineageTag: c3d4e5f6-a7b8-9012-cdef-123456789012
+
+	column Marcador
+		dataType: string
+		isHidden
+		lineageTag: 26985ab6-9849-4401-90ae-4a6e76e2ec2b
+		summarizeBy: none
+		sourceColumn: Marcador
+
+	partition _Medidas = m
+		mode: import
+		source =
+				let
+				    Origen = Table.FromRows({{""}}, {"Marcador"}),
+				    Tipada = Table.TransformColumnTypes(Origen, {{"Marcador", type text}})
+				in
+				    Tipada
+

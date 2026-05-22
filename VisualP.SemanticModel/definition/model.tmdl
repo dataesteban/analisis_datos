@@ -1,0 +1,34 @@
+model Model
+	culture: es-ES
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: es-ES
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation PBI_QueryOrder = ["Trans","Clientes","Estaciones","Geo","Calendario","Forecast","_Medidas","trans_clean","customers_clean","estaciones_clean","geo_clean"]
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table Trans
+ref table Clientes
+ref table Estaciones
+ref table Geo
+ref table Calendario
+ref table Forecast
+ref table _Medidas
+ref table trans_clean
+ref table DateTableTemplate_d9f729db-d445-4b16-a876-fe52e76d3924
+ref table LocalDateTable_fdbdc1a7-2950-41b4-aeed-04271f604eff
+ref table LocalDateTable_443c4952-3be2-4d8e-9f3a-e296ce6f7531
+ref table LocalDateTable_b0d35c4d-6470-4522-925d-8c814d266a0e
+ref table LocalDateTable_b4d85c89-4931-499e-9822-b9528731152e
+ref table customers_clean
+ref table LocalDateTable_d20839ee-92b0-459e-8567-75a25a69c844
+ref table estaciones_clean
+ref table geo_clean
+
+ref cultureInfo es-ES
+

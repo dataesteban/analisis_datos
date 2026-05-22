@@ -1,33 +1,48 @@
 """
-============================================================
-  On Daxelta — Script de limpieza y preparación de datos
-  Autor  : [tu nombre]
-  Fecha  : 2024
-  Python : 3.9+
-  Deps   : pandas, numpy, openpyxl
-============================================================
-
-EJECUCIÓN:
-    pip install pandas numpy openpyxl
-    python limpieza_ondaxelta.py
-
-SALIDAS (carpeta /output):
-    trans_clean.csv        — Transacciones unificadas y limpias
-    customers_clean.csv    — Clientes normalizados
-    estaciones_clean.csv   — Estaciones normalizadas
-    geo_clean.csv          — Geografía completa con flag EsInternacional
-    reporte_inconsistencias.txt — Documentación de hallazgos
-============================================================
+Limpieza y preparación de datos — On Daxelta.
+Lee las 5 fuentes originales y genera en /output:
+  trans_clean.csv, customers_clean.csv, estaciones_clean.csv,
+  geo_clean.csv, reporte_inconsistencias.txt
 """
 
 import sys
 import io
+import time
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 import pandas as pd
 import numpy as np
 import os
 from datetime import datetime
+
+# ── Motor Excel: fastexcel (Rust+Arrow) > calamine > openpyxl ──
+try:
+    import fastexcel as _fastexcel  # noqa
+    EXCEL_ENGINE = "fastexcel"
+except ImportError:
+    try:
+        import python_calamine  # noqa
+        EXCEL_ENGINE = "calamine"
+    except ImportError:
+        EXCEL_ENGINE = "openpyxl"
+
+def read_excel_fast(path, dtype=None):
+    """Lee un Excel usando el motor más rápido disponible."""
+    if EXCEL_ENGINE == "fastexcel":
+        import fastexcel
+        df = fastexcel.read_excel(path).load_sheet(0).to_pandas()
+        if dtype:
+            for col, t in dtype.items():
+                if col in df.columns:
+                    try:
+                        df[col] = df[col].astype(t)
+                    except Exception:
+                        pass
+        return df
+    # calamine u openpyxl: vía pandas
+    return pd.read_excel(path, engine=EXCEL_ENGINE, dtype=dtype)
+
+print(f"[motor Excel] {EXCEL_ENGINE}")
 
 # ── Rutas de entrada (ajusta según tu entorno) ─────────────
 INPUT_DIR  = "."          # carpeta donde están los archivos originales
@@ -59,8 +74,12 @@ def registrar(archivo, tipo, descripcion, cantidad=None):
 #  1. GEO
 # ══════════════════════════════════════════════════════════
 print("\n▶ 1/5  Geo.xlsx")
+_t = time.time()
 
-geo = pd.read_excel(os.path.join(INPUT_DIR, "Geo.xlsx"))
+geo = read_excel_fast(
+    os.path.join(INPUT_DIR, "Geo.xlsx"),
+    dtype={"IdCiudad": "Int64", "NombreDpto": str, "NombreCiudad": str},
+)
 
 # -- Diagnóstico
 n_internacionales = (geo["IdCiudad"] < 0).sum()
@@ -83,17 +102,19 @@ registrar("Geo", "INFO",
           f"Ciudades Colombia: {n_colombia:,} | Internacionales marcadas: {n_internacional:,}")
 
 geo.to_csv(os.path.join(OUTPUT_DIR, "geo_clean.csv"), index=False, encoding="utf-8-sig")
-print(f"   ✔ geo_clean.csv guardado ({len(geo):,} filas)")
+print(f"   ✔ geo_clean.csv guardado ({len(geo):,} filas)  [{time.time()-_t:.1f}s]")
 
 
 # ══════════════════════════════════════════════════════════
 #  2. ESTACIONES
 # ══════════════════════════════════════════════════════════
 print("\n▶ 2/5  Estaciones")
+_t = time.time()
 
 est = pd.read_csv(
     os.path.join(INPUT_DIR, "Estaciones"),
-    sep="£", encoding="latin-1", engine="python"
+    sep="£", encoding="latin-1", engine="python",
+    dtype={"IdEstacion": "Int64", "IdCiudad": "Int64", "TipoEstacion": str},
 )
 
 # -- Diagnóstico
@@ -140,24 +161,34 @@ registrar("Estaciones", "INFO",
           f"Tipos finales: {est['TipoEstacion'].value_counts().to_dict()}")
 
 est.to_csv(os.path.join(OUTPUT_DIR, "estaciones_clean.csv"), index=False, encoding="utf-8-sig")
-print(f"   ✔ estaciones_clean.csv guardado ({len(est):,} filas)")
+print(f"   ✔ estaciones_clean.csv guardado ({len(est):,} filas)  [{time.time()-_t:.1f}s]")
 
 
 # ══════════════════════════════════════════════════════════
 #  3. CUSTOMERS
 # ══════════════════════════════════════════════════════════
 print("\n▶ 3/5  Customers.xlsx")
+_t = time.time()
 
-cust = pd.read_excel(os.path.join(INPUT_DIR, "Customers.xlsx"))
+# calamine (Rust) es 10-100x más rápido que openpyxl para archivos grandes.
+# dtype=str en la lectura evita type-inference por fila; conversiones se hacen
+# vectorialmente después — significativamente más rápido en 800k filas.
+cust = read_excel_fast(os.path.join(INPUT_DIR, "Customers.xlsx"))
 
 n_total_cust = len(cust)
+print(f"   Archivo leído ({n_total_cust:,} filas)  [{time.time()-_t:.1f}s]")
+
+# -- Conversiones de tipo (vectoriales, mucho más rápidas que cell-by-cell en Excel)
+cust["IdCliente"]  = pd.to_numeric(cust["IdCliente"],  errors="coerce").astype("Int64")
+cust["IdCiudad"]   = pd.to_numeric(cust["IdCiudad"],   errors="coerce").astype("Int64")
 
 # -- Diagnóstico FechaNacimiento
 cust["FechaNacimiento"] = pd.to_datetime(cust["FechaNacimiento"], errors="coerce")
 n_fecha_nula  = cust["FechaNacimiento"].isnull().sum()
 cust["_edad"] = ANIO_REF - cust["FechaNacimiento"].dt.year
 n_menores_16  = (cust["_edad"] < 16).sum()
-n_mayores_90  = (cust["_edad"] > 90).sum()
+n_mayores_100 = (cust["_edad"] > 100).sum()
+n_entre_91_100 = ((cust["_edad"] >= 91) & (cust["_edad"] <= 100)).sum()
 n_fecha_futura = (cust["FechaNacimiento"].dt.year > ANIO_REF).sum()
 
 registrar("Customers", "CRITICO",
@@ -167,7 +198,9 @@ registrar("Customers", "CRITICO",
 registrar("Customers", "ADVERTENCIA",
           "Edad calculada < 16 años (no deberían ser titulares)", n_menores_16)
 registrar("Customers", "ADVERTENCIA",
-          "Edad calculada > 90 años (verificar)", n_mayores_90)
+          "Edad calculada > 100 años (probablemente error de captura)", n_mayores_100)
+registrar("Customers", "INFO",
+          "Edad calculada 91-100 años (adultos mayores — se conservan como confiables)", n_entre_91_100)
 
 # -- Diagnóstico Segmento (NaN técnico vs "Sin Segmento" literal en fuente)
 n_seg_nulo = cust["Segmento"].isnull().sum()
@@ -186,44 +219,66 @@ registrar("Customers", "ADVERTENCIA",
 # Normalizar Segmento: strip de espacios + nulos a "Sin Segmento"
 cust["Segmento"] = _seg_strip.fillna("Sin Segmento")
 
-# Normalizar IdCiudad para join (Int64 nullable, consistente con trans)
-cust["IdCiudad"] = pd.to_numeric(cust["IdCiudad"], errors="coerce").astype("Int64")
-
 # Marcar filas con FechaNacimiento no confiable (para análisis de edad)
 # NO se eliminan — se marcan para uso correcto en segmentación demográfica
 cust["FechaNac_confiable"] = (
     cust["FechaNacimiento"].notna() &
     (cust["_edad"] >= 16) &
-    (cust["_edad"] <= 90)
+    (cust["_edad"] <= 100)
 )
 n_no_confiable = (~cust["FechaNac_confiable"]).sum()
 registrar("Customers", "INFO",
           f"FechaNacimiento NO confiable (marcada, no eliminada): {n_no_confiable:,} "
           f"({n_no_confiable/n_total_cust*100:.1f}%)")
 
-# Calcular edad solo donde es confiable
-cust["Edad"] = np.where(cust["FechaNac_confiable"], cust["_edad"], np.nan)
+# Calcular edad solo donde es confiable.
+# Int64 (nullable) escribe enteros sin decimales en CSV: "45" no "45.0".
+# Evita que Power BI con locale es-CO interprete el punto como miles y lea 45.0 → 450.
+cust["Edad"] = cust["_edad"].where(cust["FechaNac_confiable"]).astype("Int64")
 
 # Limpiar columnas auxiliares
 cust.drop(columns=["_edad"], inplace=True)
+
+# Deduplicar por IdCliente (keeper=first para conservar primera aparición)
+n_antes = len(cust)
+cust = cust.drop_duplicates(subset=["IdCliente"], keep="first")
+n_dupes_cust = n_antes - len(cust)
+if n_dupes_cust:
+    registrar("Customers", "ADVERTENCIA",
+              f"Filas duplicadas eliminadas (mismo IdCliente): {n_dupes_cust:,}")
 
 registrar("Customers", "INFO",
           f"Distribución segmentos: {cust['Segmento'].value_counts().to_dict()}")
 
 cust.to_csv(os.path.join(OUTPUT_DIR, "customers_clean.csv"), index=False, encoding="utf-8-sig")
-print(f"   ✔ customers_clean.csv guardado ({len(cust):,} filas)")
+
+# ── Validación: confirmar que no quedaron edades imposibles ──
+edad_max = cust["Edad"].max()
+edad_min = cust["Edad"].min()
+n_edad_invalida = (cust["Edad"] > 100).sum()
+print(f"   ✔ customers_clean.csv guardado ({len(cust):,} filas)  [{time.time()-_t:.1f}s]")
+print(f"   ✔ Edad — min: {edad_min:.0f}  max: {edad_max:.0f}  valores > 100: {n_edad_invalida}")
 
 
 # ══════════════════════════════════════════════════════════
 #  4. TRANSACCIONES — Carga y corrección individual
 # ══════════════════════════════════════════════════════════
 print("\n▶ 4/5  Transacciones (Trans_Sem + Trans_2_Sem)")
+_t = time.time()
+
+# dtype=str evita inferencia fila-a-fila; conversiones vectoriales después.
+# engine omitido → pandas usa C engine (10-20x más rápido que python engine).
+# § es 0xA7 en latin-1 = 1 byte → compatible con C engine.
+_TRANS_DTYPE = {
+    "Placa": str, "IdCliente": str, "IdEstacion": str,
+    "ValorVenta": str, "Gal_Fid": str, "Gal": str, "FechaVenta": str,
+}
 
 # ── 4a. Trans_Sem ──────────────────────────────────────────
 print("   Cargando Trans_Sem...")
 t1 = pd.read_csv(
     os.path.join(INPUT_DIR, "Trans_Sem"),
-    sep="§", encoding="latin-1", engine="python"
+    sep="§", encoding="latin-1", engine="python", dtype=_TRANS_DTYPE,
 )
 # Columnas correctas: Placa§IdCliente§IdEstacion§ValorVenta§Gal_Fid§Gal§FechaVenta
 t1["_fuente"] = "Trans_Sem"
@@ -232,7 +287,7 @@ t1["_fuente"] = "Trans_Sem"
 print("   Cargando Trans_2_Sem...")
 t2 = pd.read_csv(
     os.path.join(INPUT_DIR, "Trans_2_Sem"),
-    sep="§", encoding="latin-1", engine="python"
+    sep="§", encoding="latin-1", engine="python", dtype=_TRANS_DTYPE,
 )
 # INCONSISTENCIA DOCUMENTADA: el header está desplazado respecto a los datos.
 # Los datos reales están en orden: Placa, IdCliente, IdEstacion, ValorVenta, Gal_Fid, Gal, FechaVenta
@@ -253,7 +308,7 @@ registrar("Transacciones", "INFO",
           f"(Trans_Sem: {len(t1):,} | Trans_2_Sem: {len(t2):,})")
 
 # ── 4d. Tipos de datos ─────────────────────────────────────
-trans["FechaVenta"] = pd.to_datetime(trans["FechaVenta"], errors="coerce")
+trans["FechaVenta"] = pd.to_datetime(trans["FechaVenta"], errors="coerce", format="mixed")
 trans["ValorVenta"] = pd.to_numeric(trans["ValorVenta"], errors="coerce")
 trans["Gal"]        = pd.to_numeric(trans["Gal"],        errors="coerce")
 trans["Gal_Fid"]    = pd.to_numeric(trans["Gal_Fid"],    errors="coerce")
@@ -347,7 +402,7 @@ registrar("Transacciones", "INFO",
           f"Registros finales limpios: {len(trans):,}")
 
 trans.to_csv(os.path.join(OUTPUT_DIR, "trans_clean.csv"), index=False, encoding="utf-8-sig")
-print(f"   ✔ trans_clean.csv guardado ({len(trans):,} filas)")
+print(f"   ✔ trans_clean.csv guardado ({len(trans):,} filas)  [{time.time()-_t:.1f}s]")
 
 
 # ══════════════════════════════════════════════════════════
@@ -420,7 +475,7 @@ with open(reporte_path, "w", encoding="utf-8") as f:
     f.write(f"{sep}\n")
     recomendaciones = [
         "1. Definir un esquema de validación en origen para FechaNacimiento.",
-        "   Rechazar fechas futuras o años de nacimiento > (año_actual - 16).",
+        "   Rechazar fechas futuras o edades < 16 o > 100 (FechaNac_confiable=False).",
         "",
         "2. Corregir el header de Trans_2_Sem en el sistema fuente.",
         "   El orden correcto de columnas es:",
